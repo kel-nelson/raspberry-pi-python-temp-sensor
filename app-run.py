@@ -1,11 +1,11 @@
 #!/usr/bin/python
 #script provided "as-is" with no guarantees.
-import sys, datetime
+import os, sys, datetime, ConfigParser
+from funcs import *
 
-now = datetime.datetime.now()
-
+print('Runmode: ' + app_mode)
 try:
-    temp_value = int(sys.argv[1])
+    temp_value = float(sys.argv[1])
 except:
     temp_value = None
 
@@ -13,38 +13,13 @@ try:
     temp_unit = (sys.argv[2])
 except:
     temp_unit = 'F'
-    
+
 try:
-    log_format = sys.argv[3]
+    write_log_data(float(temp_value), temp_unit)
 except:
-    log_format = 'RAW'
+    handle_error('unable to read temp value.')
+    sys.exit()
 
-temp_min=32
-temp_max=99
+if(waited_long_enough(int(app_config.get('notifications','report_wait_hours')), app_path + '/last_report_notice.dat')):
+    check_temp(float(temp_value))
 
-logfile='C:/temp/test.json'
-
-
-status='ERROR'
-#if temp_check is None:
-
-def write_log(timestamp, temp_value, temp_unit):
-    timestamp = str(timestamp)
-    temp_value = str(temp_value)
-    f = open(logfile,'a')
-    if log_format == 'JSON':
-        f.write("{'timestamp':'" + timestamp + "','temp_value':'" + temp_value + "','temp_unit':'" + temp_unit + "'}\r\n")
-    else:
-        f.write(timestamp + '\t' + temp_value + '\t' + temp_unit + '\r\n')
-    
-write_log(now, temp_value, temp_unit)
-
-def check_temp(temp_value):
-    if temp_value > temp_max:
-        print("too hot")
-    elif temp_value < temp_min:
-        print("too cold")
-    else:
-        print("normal")
-
-check_temp(temp_value)

@@ -1,10 +1,10 @@
-import os, sys, configparser, datetime, time, smtplib
+import os, sys, ConfigParser, datetime, time, smtplib
 #from dateutil.parser import *
 
 _now = datetime.datetime.now()
 
 app_path = os.path.dirname(os.path.realpath(__file__))
-app_config = configparser.RawConfigParser()
+app_config = ConfigParser.RawConfigParser()
 app_config.read(app_path + '/settings.cfg')
 app_mode = 'Debug' if app_config.get('production', 'debug_mode').lower()=='true' else 'Production'
 
@@ -28,7 +28,7 @@ def waited_long_enough(wait_hours, last_datestamp_file):
     #figure out last timestamp
     last_notice = read_last_notice()
     if(last_notice is None):
-        write_last_notice(_now)
+        write_last_notice()
 
     last_notice = read_last_notice()
     
@@ -37,9 +37,9 @@ def waited_long_enough(wait_hours, last_datestamp_file):
         return True
     
     duration = _now - last_notice
-    return True
+    #return True
     if((duration.total_seconds()/60/60)>wait_hours): #after x hrs, have waited long enough.
-        write_last_notice(_now)
+        write_last_notice()
         return True
     else:
         return False
@@ -64,21 +64,21 @@ def write_log_data(temp_value, temp_unit):
     except:
         log_format = 'RAW'
 
-    file_path = app_config.get('logs', 'data_file')
+    file_path = app_config.get('logs', 'data_directory')
     if(file_path[0] != '/'):
         file_path = app_path + "/" + file_path
 
     if log_format == 'JSON':
-        row = "{'timestamp':'" + timestamp + "','temp_value':'" + temp_value + "','temp_unit':'" + temp_unit + "'}\r"
+        row = "{'timestamp':'" + timestamp + "','temp_value':'" + temp_value + "','temp_unit':'" + temp_unit + "'}\r\n"
     else:
-        row = timestamp + '\t' + temp_value + '\t' + temp_unit + '\r'
+        row = timestamp + '\t' + temp_value + '\t' + temp_unit + '\r\n'
 
     if(app_mode == 'Debug'):
         print("Sending data to console instead of data file.")
         print(row)
         return
-    
-    with open(file_path, "a") as f:        
+	
+    with open(file_path + "/" + str(_now.year) + "-" + str(_now.month) + "-" + str(_now.day) + "." + log_format + ".dat" , "a") as f:        
         f.write(row)
         
 def check_temp(temp_value):
