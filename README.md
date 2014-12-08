@@ -11,4 +11,5 @@ Dependency on work @ https://github.com/padelt/temper-python
 It's recommended to use **cron-run-interval.sh** as part of a minute-ly (x) cron job and **cron-run-reboot.sh** as part of a reboot (on-startup) cron job.
 
 **settings.py**
+
 	Edit to configure logfile, notifications, temp sensor settings, and etc.
