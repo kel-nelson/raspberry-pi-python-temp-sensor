@@ -2,6 +2,7 @@ raspberry-pi-python-temp-sensor
 ===============================
 
 Dependency on work @ https://github.com/padelt/temper-python
+
 ***Run as Cron Jobs***
 
 **cron-run-interval.sh**: Set Cron frequency to how often you want to check temp, log, and check to send interval notifications.
