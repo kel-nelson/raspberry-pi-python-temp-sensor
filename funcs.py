@@ -9,6 +9,8 @@ app_config.read(app_path + '/settings.cfg')
 app_mode = 'Debug' if app_config.get('production', 'debug_mode').lower()=='true' else 'Production'
 
 def waited_long_enough(wait_hours, last_datestamp_file):
+    #returns 0:No, 1:Yes, 2:Yes & First Run Init.
+    
     def read_last_notice():
         try:
             with open(last_datestamp_file, "r") as f:
@@ -25,24 +27,25 @@ def waited_long_enough(wait_hours, last_datestamp_file):
         except:
             pass
 
+    first_run = False
     #figure out last timestamp
     last_notice = read_last_notice()
     if(last_notice is None):
         write_last_notice()
-
-    last_notice = read_last_notice()
-    
-    if(last_notice is None): #unable to figure out last timestamp.
-        send_notice_message("Error", 'unable to read last_error_notice.dat and figure out last time notification has been sent.')
-        return True
+        last_notice = read_last_notice()
+        if(last_notice is None): #unable to figure out last timestamp.
+            send_notice_message("Error", 'unable to read last_error_notice.dat and figure out last time notification has been sent.')
+            return 1
+        return 2 #first run init
     
     duration = _now - last_notice
     #return True
-    if((duration.total_seconds()/60/60)>wait_hours): #after x hrs, have waited long enough.
+    duration_hours = duration.total_seconds()/60/60 
+    if((duration_hours)>wait_hours): #after x hrs, have waited long enough.
         write_last_notice()
-        return True
+        return 1
     else:
-        return False
+        return 0
 
 def handle_error(message):
                 
@@ -52,7 +55,7 @@ def handle_error(message):
     def send_notice_error(message):
         send_notice_message("Error", message)
 
-    if(waited_long_enough(int(app_config.get('notifications','error_wait_hours')), app_path + '/last_error_notice.dat')):
+    if(waited_long_enough(int(app_config.get('notifications','error_wait_hours')), app_path + '/last_error_notice.dat') in (1,2)):
         send_notice_message("Error", message)
 
 def write_log_data(temp_value, temp_unit):
@@ -81,21 +84,27 @@ def write_log_data(temp_value, temp_unit):
     with open(file_path + "/" + str(_now.year) + "-" + str(_now.month) + "-" + str(_now.day) + "." + log_format + ".dat" , "a") as f:        
         f.write(row)
         
-def check_temp(temp_value):
+def get_temp_status_code(temp_value):
+    #returns -1:Too cold, 0:Normal, 1:Too Hot
     try:
         temp_min = int(app_config.get('temp_sensor', 'temp_min'))
         temp_max = int(app_config.get('temp_sensor', 'temp_max'))
     except:
         handle_error(_now, 'unable to read temp_min and/or temp_max from settings.cfg file.')
 
-    status = "Temp Ok"
     if temp_value > temp_max:
-        status = "Too Hot"
+        return 1
     elif temp_value < temp_min:
-        status = "Too Cold"
+        return -1
 
-    send_notice_message(status, "The current temp reading is: " + str(temp_value))
-    
+    return 0
+def get_temp_status_code_text(status_code):
+    if(status_code==-1):
+        return "Too Cold"
+    if(status_code==1):
+        return "Too Hot"
+    return "Normal"
+
 def send_notice_message(subject, message):
     print(subject + ": " + message)
     if(app_mode == 'Debug'):
@@ -116,3 +125,4 @@ def send_notice_message(subject, message):
     # body_of_email can be plaintext or html!                    
     content = headers + "\r\n\r\n" + message
     session.sendmail(app_config.get('notification_from', 'mail_username'), app_config.get('notification_to', 'mail_recipients'), content)
+    
