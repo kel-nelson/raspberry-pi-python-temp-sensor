@@ -19,8 +19,8 @@ except:
     handle_error('unable to read temp value.')
     sys.exit()
 
-waited_long_enough_hourly_value = waited_long_enough(int(app_config.get('notifications','report_wait_hours')), app_path + '/last_report_hourly_notice.dat') 
-waited_long_enough_daily_value = waited_long_enough(24, app_path + '/last_report_daily_notice.dat')
+waited_long_enough_hourly_value = waited_long_enough(int(app_config.get('notifications','report_wait_hours')), app_path + '/notices/last_report_hourly_notice.dat') 
+waited_long_enough_daily_value = waited_long_enough(24, app_path + '/notices/last_report_daily_notice.dat')
 if(waited_long_enough_hourly_value in (1,2) or waited_long_enough_daily_value != 0):
     temp_status_code = get_temp_status_code(float(temp_value))
     temp_status_text = get_temp_status_code_text(temp_status_code)

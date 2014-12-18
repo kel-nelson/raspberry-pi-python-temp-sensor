@@ -27,14 +27,13 @@ def waited_long_enough(wait_hours, last_datestamp_file):
         except:
             pass
 
-    first_run = False
     #figure out last timestamp
     last_notice = read_last_notice()
     if(last_notice is None):
         write_last_notice()
         last_notice = read_last_notice()
         if(last_notice is None): #unable to figure out last timestamp.
-            send_notice_message("Error", 'unable to read last_error_notice.dat and figure out last time notification has been sent.')
+            send_notice_message("Error", 'unable to read ' + last_datestamp_file + ' and figure out last time notification has been sent.')
             return 1
         return 2 #first run init
     
@@ -55,7 +54,7 @@ def handle_error(message):
     def send_notice_error(message):
         send_notice_message("Error", message)
 
-    if(waited_long_enough(int(app_config.get('notifications','error_wait_hours')), app_path + '/last_error_notice.dat') in (1,2)):
+    if(waited_long_enough(int(app_config.get('notifications','error_wait_hours')), app_path + '/notices/last_error_notice.dat') in (1,2)):
         send_notice_message("Error", message)
 
 def write_log_data(temp_value, temp_unit):
