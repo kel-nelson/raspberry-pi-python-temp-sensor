@@ -1,0 +1,1 @@
+This folder contains time interval tracking files (*.dat). Each file contains a datetime since process was last run, one file per process.
