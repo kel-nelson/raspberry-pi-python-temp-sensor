@@ -1,15 +1,15 @@
 #!/usr/bin/python
-import os, sys, datetime, ConfigParser
+import os, sys, datetime, ConfigParser, re
 from funcs import *
 
 print('Runmode: ' + app_mode)
 try:
-    temp_value = float(sys.argv[1])
+	temp_value = float(re.findall("\d+.\d+", str(sys.argv[1]))[0])
 except:
-    temp_value = None
+	temp_value = None
 
 try:
-    temp_unit = (sys.argv[2])
+    temp_unit = (str(sys.argv[2]))
 except:
     temp_unit = 'F'
 
